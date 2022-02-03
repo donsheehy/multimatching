@@ -4,4 +4,6 @@ from multimatching import dB
 A = Diagram([(2,3), (5,10)])
 B = Diagram([(5,11), (9,10)])
 
-dB(A, B)
+d, tp = dB(A, B, get_matching=True)
+
+print(tp)

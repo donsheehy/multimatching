@@ -1,12 +1,9 @@
 from collections import namedtuple
-
 from ortools.graph import pywrapgraph
 from pdsketch import Diagram
 
 
-def dB(A: Diagram, B: Diagram, upperbound=float('inf')) -> float:
-    # list_A = A.get_point_mass_lists()[0]
-    # list_B = B.get_point_mass_lists()[0]
+def dB(A: Diagram, B: Diagram, upperbound=float('inf'), get_matching=False) -> float:
     n_A = sum(A.mass.values())
     n_B = sum(B.mass.values())
     n = len(A) + 1
@@ -57,8 +54,21 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf')) -> float:
         G.Solve(source, sink)
         if G.OptimalFlow() == expected_flow:
             bottleneck = edges[mid]
+            maxflow = G
             i, j = i, mid
         else:
             i, j = mid, j
 
-    return bottleneck.distance
+    tp = {}
+    if get_matching:
+        for i in range(maxflow.NumArcs()):
+            a_index = maxflow.Tail(i)
+            b_index = maxflow.Head(i)
+            if (a_index != source and b_index != sink):
+                if a_index in tp and b_index in tp[a_index]:
+                        tp[a_index][b_index] += maxflow.Flow(i)
+                else:
+                    tp[a_index] = {b_index: maxflow.Flow(i)}
+        return bottleneck.distance, tp
+    else:
+        return bottleneck.distance
