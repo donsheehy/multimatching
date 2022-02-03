@@ -22,11 +22,11 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf')) -> float:
         # add edge from source to points in A
         edges.append(Edge(0, source, i, 1))
         # add edge from
-        edges.append(Edge(a.pp_dist(a.diagproj()), i, diag_B, 1))
+        edges.append(Edge(a.l_inf_dist(a.diagproj()), i, diag_B, 1))
     # Next, add the edges from B to the sink.
     for j, b in enumerate(B, start=n):
         edges.append(Edge(0, j, sink, 1))
-        edges.append(Edge(b.pp_dist(b.diagproj()), diag_A, j, 1))
+        edges.append(Edge(b.l_inf_dist(b.diagproj()), diag_A, j, 1))
     # Add edges with the diagonal.
     edges.append(Edge(0, diag_A, diag_B, min(n_A, n_B)))
     edges.append(Edge(0, source, diag_A, n_B))
@@ -34,7 +34,7 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf')) -> float:
     # Only include the edges from A to B that might be matched.
     for i, a in enumerate(A):
         for j, b in enumerate(B, start=n):
-            if a.pp_dist(b) <= min(upperbound, max(a.pp_dist(a.diagproj()), b.pp_dist(b.diagproj(
+            if a.pp_dist(b) <= min(upperbound, max(a.l_inf_dist(a.diagproj()), b.l_inf_dist(b.diagproj(
 
             )))):
                 edges.append(Edge(a.dist(b), i, j, 1))
