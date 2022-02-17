@@ -1,6 +1,6 @@
 import unittest
 
-from pdsketch import Diagram
+from pdsketch import Diagram, PDPoint
 
 from multimatching import dB
 
@@ -75,6 +75,13 @@ class TestDBwithMult(unittest.TestCase):
         bottleneck_distance, matching = dB(A, B, get_matching=True)
         print(matching)
         self.assertEqual(bottleneck_distance, 1.0)
+
+    def test_sid(self):
+        A = Diagram([(2, 3), (5, 10)], [3, 4])
+        B = Diagram([(5, 11), (9, 10)], [1, 6])
+        bottleneck_distance, matching = dB(A, B, get_matching=True)
+        print(matching)
+        self.assertEqual(bottleneck_distance, 2.5)
 
 
 if __name__ == '__main__':
