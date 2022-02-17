@@ -29,31 +29,38 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf'), get_matching=False) -> f
     Edge = namedtuple('Edge', ['distance', 'start', 'end', 'capacity'])
     diagonal_PDpoint = PDPoint((0, 0))
     points = []
+
     for i, (a, m) in enumerate(A.mass.items()):
         # add edge from source to points in A
         edges.append(Edge(0, source, i, m))
         # add edge from each point to the diagonal
         edges.append(Edge(a.l_inf_dist(a.diagproj()), i, diagonal_B, m))
         points.append(a)
-    # Next, add the edges from B to the sink.
+
     points.append(diagonal_PDpoint)
+
+    # Next, add the edges from B to the sink.
     for j, (b, m) in enumerate(B.mass.items(), start=b_diagram_offset):
         # add edges to from points to the sink
         edges.append(Edge(0, j, sink, m))
         # add edges from diagonal to the points
         edges.append(Edge(b.l_inf_dist(b.diagproj()), diagonal_A, j, m))
         points.append(b)
+
     points.append(diagonal_PDpoint)
+
     # Add edges with the diagonal.
     edges.append(Edge(0, diagonal_A, diagonal_B, min(n_A, n_B)))
     edges.append(Edge(0, source, diagonal_A, n_B))
     edges.append(Edge(0, diagonal_B, sink, n_A))
+
     # Only include the edges from A to B that might be matched.
     for i, (a, a_mass) in enumerate(A.mass.items()):
         for j, (b, b_mass) in enumerate(B.mass.items(), start=b_diagram_offset):
             if a.pp_dist(b) <= min(upperbound,
                                    max(a.l_inf_dist(a.diagproj()), b.l_inf_dist(b.diagproj()))):
                 edges.append(Edge(a.dist(b), i, j, min(a_mass, b_mass)))
+
     # Sort the edges by length
     edges.sort()
 
@@ -90,7 +97,7 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf'), get_matching=False) -> f
         for i in range(maxflow.NumArcs()):
             tail_index = maxflow.Tail(i)
             head_index = maxflow.Head(i)
-            if tail_index != source and head_index != sink:
+            if tail_index != source and head_index != sink and maxflow.Flow(i) > 0:
                 tp[points[tail_index]][points[head_index]] = maxflow.Flow(i)
         return bottleneck.distance, tp
     else:
