@@ -1,24 +1,24 @@
-# Multi Matching
+# Multimatching
 
-A python package for computing the bottleneck distance between two persistence diagrams with
-lots of duplicate points (multiplicity). This package uses the reduction of bipartite matching to
-maximum flow to provide a speedup in cases with high multiplicities.
+A Python package for computing the bottleneck distance between persistence diagrams.
+It is optimized for diagrams in which the points have multiplicity.
 
 ## Basic explanation of algorithm
 
-We use the fact that bipartite matching can be reduced to maximum flow.
+The basic pattern for the algorithm resembles the approach in the `persim` package.
+Instead of using the Hopcroft-Karp algorithm to check for a perfect matching at a given scale, we instead solve a maximum flow problem where the capacities are determined by the multiplicities.
 
 Steps:
-- We create a dummy sink and source
-- Create edges from source to points in diagram A
-- Create edges from source to points in diagram B
-- Add edges with the diagonal such as: sink, source, and diagonal to diagonal
-- Create edges from points in diagram A to diagram B if they can be matched, i.e. if either of
-  the points has a shorter distance to the diagonal then we'd like to match with the diagonal
-  instead of the point
-- Conduct binary search over the set of edges created based on bottleneck distance
-- Each time we create a new matching, we check if it is a perfect matching using a maximum flow
-  algorithm (we use the one from or-tools created by Google)
+- We first compute the pairwise distances between points, adding a dummy point to each set for the diagonal.
+- Then, we do a binary search for the bottleneck distance.  At each scale $\delta$ , we do the following
+  - Construct a $\delta$-neighborhood graph.
+  - We create a dummy sink and source vertex
+  - Create edges from source to points in diagram A
+  - Create edges from source to points in diagram B
+  - Add edges with the diagonal such as: sink, source, and diagonal to diagonal
+  - For all edges, the capacity is the minimum multiplicity of the endpoints.
+  - Compute a maximum flow in the graph.
+  - If the total flow corresponds to the total multiplicity of the diagrams, then we search try a smaller scale. Otherwise, we try a larger scale.
 
 ## Examples
 
