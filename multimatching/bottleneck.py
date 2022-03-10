@@ -57,8 +57,16 @@ def dB(A: Diagram, B: Diagram, upperbound=float('inf'), get_matching=False) -> f
     # Only include the edges from A to B that might be matched.
     for i, (a, a_mass) in enumerate(A.mass.items()):
         for j, (b, b_mass) in enumerate(B.mass.items(), start=b_diagram_offset):
-            if a.pp_dist(b) <= min(upperbound,
-                                   max(a.l_inf_dist(a.diagproj()), b.l_inf_dist(b.diagproj()))):
+            a_distance_to_diagonal = a.l_inf_dist(a.diagproj())
+            b_distance_to_diagonal = b.l_inf_dist(b.diagproj())
+            # we want the longer distance:
+            # if either has a shorter distance to the diagonal then we'd like to match with the
+            # diagonal instead of the other point
+            longest_diagonal_distance = max(a_distance_to_diagonal, b_distance_to_diagonal)
+            # upperbound is the hint that the user potentially gave us to decrease the size of
+            # the search space
+            comparedDist = min(upperbound, longest_diagonal_distance)
+            if a.pp_dist(b) <= comparedDist:
                 edges.append(Edge(a.dist(b), i, j, min(a_mass, b_mass)))
 
     # Sort the edges by length
