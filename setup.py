@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="multimatching",
-    version="0.0.1",
+    version="0.1.0",
     author="Rohak Rastogi, Donald R. Sheehy and Siddharth Sheth",
     author_email="don.r.sheehy@gmail.com",
     description="A Python package for computing bottleneck distance.",
@@ -20,7 +20,6 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=['pdsketch',
-                      'greedypermutation',
-                      'metricspaces',
+                      'ortools'
                      ],
 )

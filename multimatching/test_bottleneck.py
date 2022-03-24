@@ -1,7 +1,6 @@
 import unittest
 
 from pdsketch import Diagram, PDPoint
-
 from multimatching import dB
 
 
@@ -39,12 +38,10 @@ class TestDBwithMult(unittest.TestCase):
 
     def test_one_point_with_different_mults(self):
         #  Two diagrams with unequal multiplicity
-        A = Diagram([(0, 6)], [1000000001])
-        B = Diagram([(1, 6)], [1000000000])
+        A = Diagram([(0, 6)], [1000000000])
+        B = Diagram([(1, 6)], [1000000001])
         bottleneck_distance, matching = dB(A, B, get_matching=True)
-        # kinda weird matching?
-        print(matching)
-        self.assertEqual(bottleneck_distance, 3.0)
+        self.assertEqual(bottleneck_distance, 2.5)
 
     def test_multiple_points_with_different_mults(self):
         diagonal_pd_point = PDPoint((0.0, 0.0))
@@ -129,7 +126,7 @@ class TestDBwithMult(unittest.TestCase):
         self.assertEqual(matching, expected_matching)
         self.assertEqual(bottleneck_distance, 1.0)
 
-    def test_sid(self):
+    def test_matching_on_three_points(self):
         A = Diagram([(2, 3), (5, 10)], [3, 4])
         B = Diagram([(5, 11), (9, 10)], [1, 6])
         bottleneck_distance, matching = dB(A, B, get_matching=True)
