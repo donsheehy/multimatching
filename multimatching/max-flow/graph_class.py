@@ -1,3 +1,4 @@
+from collections import defaultdict
 from edge_function_class import EdgeFunction
 import math
 
@@ -64,6 +65,8 @@ class Graph:
     def cap(self):
         return self.capacity
 
+    #FORD FULKERSON's ALGORITHM
+
     #depth first search, returns path of search
     def dfs(self, residual, s, t):
         S = [(None, s)] #stack used during search
@@ -124,6 +127,8 @@ class Graph:
 
         return maxFlow
 
+    #FORD FULKERSON's ALGORITHM WITH CAPACITY SCALING
+
     #depth first search with a capacity bound
     def dfsWithCapPriority(self, residual, s, t, delta):
         S = [(None, s)] #stack used during search
@@ -166,5 +171,75 @@ class Graph:
         maxFlow = 0
         for nbr in self.nbrs(s):
             maxFlow += flow[(s,nbr)]
+
+        return maxFlow
+
+    #DINIC's ALGORIRTHM
+
+    #using a breadth first search creates a dictionary with the levels of each vertex in the graph from s 
+    def generateLevelGraph(self, residual, s):
+        Q = [(None, s)] #queue used during search
+        levels = defaultdict(lambda:0) #dict that stores levels of each vertex
+        while Q:
+            (prev,v) = Q.pop(0)
+            if v not in levels:
+                levels[v] = 1 if prev == None else levels[prev] + 1
+                for nbr in self.nbrs(v):
+                    if residual[(v, nbr)] > 0:
+                        Q.append((v,nbr))
+        return levels
+
+    def generateLevelGraphEdge(self, residual, s, t):
+        Q = [(None, s)] #queue used during search
+        levels = EdgeFunction() #dict that stores levels of each vertex
+        while Q:
+            (prev,v) = Q.pop(0)
+            if v not in levels:
+                levels[prev,v] = self.cap[prev,v]
+                if v != t:
+                    for nbr in self.nbrs(v):
+                        if residual[(v, nbr)] > 0:
+                            Q.append((v,nbr))
+        return levels
+
+    def dfsWithLevelBounds(self, s, t, levels):
+        S = [(None, s)] #stack used during search
+        path = {} #dict that stores path of travel of search
+        while S:
+            (prev,v) = S.pop()
+            if v not in path:
+                path[v] = prev
+                if v == t:
+                    break
+                for nbr in self.nbrs(v):
+                    if levels[(v, nbr)] > 0:
+                        S.append((v,nbr))
+        return path
+
+    def augmentPathWithLevels(self, s, t, levels):
+        return self.augmentFlow(levels, self.stpath(t, self.dfsWithLevelBounds(s, t, levels)))
+
+    def dinics(self, s, t):
+        residualG = EdgeFunction()
+        residualG += self.cap
+        maxFlow = 0
+
+        while True:
+            blockingFlow = EdgeFunction()
+            levelGraph = self.generateLevelGraphEdge(residualG, s, t)
+            path = self.augmentPathWithLevels(s, t, levelGraph)
+            if not path:
+                break
+            else:
+                while path:
+                    blockingFlow += path
+                    blockingFlow.reverseSub(path)
+                    levelGraph -= path
+                    residualG -= path
+
+                    path = self.augmentPathWithLevels(s, t, levelGraph)
+
+            for nbr in self.nbrs(s):
+                maxFlow += blockingFlow[(s,nbr)]
 
         return maxFlow
