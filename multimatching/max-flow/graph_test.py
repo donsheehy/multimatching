@@ -83,22 +83,24 @@ class Test_Graph(unittest.TestCase):
         G = Graph([0,1,2,3,4,5], {(0,1,10), (0,2,10), (1,2,2), (1,3,4), (1,4,8), (2,4,9), (4,3,6), (3,5,10), (4,5,10)})
         self.assertEqual(G.capacity_scaling_alg(0,5), 19)
 
-    def testLevelGraphGeneration(self):
-        G = Graph([1,2,3,4,5,6,7], {(1,2,1), (1,3,2), (2,4,3), (2,5,2), (3,6,3), (5,7,4)})
-        print(G.generateLevelGraphEdge(G.cap, 1, 7))
-
     def testDinics(self):
         G = Graph([1,2,3,4], {(1,2,1000), (1,3,1000), (2,3,1), (2,4,1000), (3,4,1000)})
-        self.assertEqual(G.dinics(1,4), 2000)
+        residual = EdgeFunction()
+        residual += G.cap
+        print(G.dfsWithLevelBounds(1, 4, G.generateLevelGraphEdge(residual, 1, 4)))
+        print(G.generateLevelGraphEdge(residual, 1))
 
-        G = Graph([1,2,3,4,5,6,7], {(1,2,1), (1,3,2), (2,4,3), (2,5,2), (3,6,3), (5,7,4)})
-        self.assertEqual(G.dinics(1,7), 1)
+        # G = Graph([1,2,3,4], {(1,2,1000), (1,3,1000), (2,3,1), (2,4,1000), (3,4,1000)})
+        # self.assertEqual(G.dinics(1,4), 2000)
 
-        G = Graph([1,2,3,4,5,6], {(1,2,11), (1,3,12), (2,4,12), (3,2,1), (3,5,11), (5,4,7), (5,6,4), (4,6,19)})
-        self.assertEqual(G.dinics(1,6), 23)
+        # G = Graph([1,2,3,4,5,6,7], {(1,2,1), (1,3,2), (2,4,3), (2,5,2), (3,6,3), (5,7,4)})
+        # self.assertEqual(G.dinics(1,7), 1)
 
-        G = Graph([0,1,2,3,4,5], {(0,1,10), (0,2,10), (1,2,2), (1,3,4), (1,4,8), (2,4,9), (4,3,6), (3,5,10), (4,5,10)})
-        self.assertEqual(G.dinics(0,5), 19)
+        # G = Graph([1,2,3,4,5,6], {(1,2,11), (1,3,12), (2,4,12), (3,2,1), (3,5,11), (5,4,7), (5,6,4), (4,6,19)})
+        # self.assertEqual(G.dinics(1,6), 23)
+
+        # G = Graph([0,1,2,3,4,5], {(0,1,10), (0,2,10), (1,2,2), (1,3,4), (1,4,8), (2,4,9), (4,3,6), (3,5,10), (4,5,10)})
+        # self.assertEqual(G.dinics(0,5), 19)
 
 if __name__ == "__main__":
     unittest.main()

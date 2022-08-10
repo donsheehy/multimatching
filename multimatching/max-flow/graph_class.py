@@ -204,17 +204,50 @@ class Graph:
 
     def dfsWithLevelBounds(self, s, t, levels):
         S = [(None, s)] #stack used during search
-        path = {} #dict that stores path of travel of search
+        path = []
         while S:
             (prev,v) = S.pop()
-            if v not in path:
-                path[v] = prev
+            if (prev, v) not in path:
+                path.append((prev,v))
                 if v == t:
-                    break
+                    continue
                 for nbr in self.nbrs(v):
                     if levels[(v, nbr)] > 0:
                         S.append((v,nbr))
         return path
+
+        
+    #get the path to the root from dict of path
+    def blockingFlowPath(self, t, path):
+        reachedVertices = []
+        for edge in path:
+            reachedVertices.append(edge[1])
+            
+            pass
+
+
+
+
+        # if t in path:
+        #     pathToS = {} #dict to store the final path of the flow from start of path to t
+        #     current = t
+        #     while path[current] is not None:
+        #         pathToS[path[current]] = current
+        #         current = path[current]
+        #     return pathToS
+        # else:
+        #     return False
+
+    #returns a flow of minimum capacity on the path
+    def augmentFlow(self, residual, path):
+        if path == False:
+            return False
+        else: 
+            pathFlow = EdgeFunction() #path flow
+            for a in path:
+                pathFlow[(a,path[a])] = residual[(a,path[a])]
+            pathFlow.set_all_cap(pathFlow.min_cap())
+            return pathFlow
 
     def augmentPathWithLevels(self, s, t, levels):
         return self.augmentFlow(levels, self.stpath(t, self.dfsWithLevelBounds(s, t, levels)))
