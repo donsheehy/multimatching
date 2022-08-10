@@ -34,10 +34,3 @@ class Flow(Graph):
             for v in vals.keys():
                 super().__setitem__((u,v), self[u,v] - other[u,v])
         return self
-
-    def set_all_cap(self, c):
-        for u in self.get_values().keys():
-            vals = self.values[u]
-            for v in vals.keys():
-                self[u,v] = c
-                self[v,u] = -c

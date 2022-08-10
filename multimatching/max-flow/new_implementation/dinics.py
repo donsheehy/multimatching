@@ -1,3 +1,4 @@
+from operator import ne
 from graph import Graph
 from flow import Flow
 import copy
@@ -38,6 +39,7 @@ def generate_blocking_flow(levelgraph, path, t):
     blockingFlow = Flow()
     currentPath = Flow()
     prev = path.pop(0)
+    backtrack = [prev]
     while path:
         (u,v) = path.pop(0)
         currentPath.addedge((u,v), levelgraph[u,v])
@@ -45,15 +47,34 @@ def generate_blocking_flow(levelgraph, path, t):
             currentPath.set_all_cap(currentPath.get_min_cap())
             blockingFlow += currentPath
             currentPath = Flow()
+            del backtrack[1:]
             if len(path) != 0:
                 prev = path.pop(0)
+                backtrack.append(prev)
                 (u,v) = prev
                 currentPath.addedge((u,v), levelgraph[u,v])
-        # elif prev != (u,v):
-        #     #figure out how to backtrack when reaching a dead end in the path
-        #     pass
+        elif prev[1] != u:
+            (a,b) = prev
+            currentPath.removeedge(a,b)
+            if len(path) == 0:
+                continue
+            (c,d) = path[0]
+            (a,b) = backtrack.pop()
+            (a,b) = backtrack.pop()
+            prev = (a,b)
+            while not (b == u and v == c):
+                currentPath.removeedge(a,b)
+                if len(backtrack) == 0:
+                    continue
+                else:
+                    (a,b) = backtrack.pop()
+                    prev = (a,b)
+            backtrack.append(prev)
+            prev = (u,v)
+            backtrack.append((u,v))
         else:
             prev = (u,v)
+            backtrack.append((u,v))
     return blockingFlow
 
 def augment_s_t_flow(graph, path):
@@ -79,10 +100,11 @@ def dinics(graph, s, t):
         except:
             break
     
-    print(flow)
+    print("graph: "); print(graph)
+    print("flow: "); print(flow)
 
     maxFlow = 0
-    for nbr in flow.getNbrs(t):
-        maxFlow -= flow[t,nbr]
+    for nbr in flow.getNbrs(s):
+        maxFlow += flow[s,nbr]
 
     return maxFlow

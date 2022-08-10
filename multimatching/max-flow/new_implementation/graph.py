@@ -23,6 +23,10 @@ class Graph:
         except KeyError:
             self.values[u] = {v: value}
 
+    def __delitem__(self,E):
+        (u,v) = E
+        del self.values[u][v]
+
     def addvertex(self,v):
         if v not in self.values:
             self.values[v] = {}
@@ -36,12 +40,12 @@ class Graph:
 
     def removevertex(self,v):
         for nbr in self[v]:
-            del self[nbr][v]
+            del self[nbr,v]
         del self[v]
 
     def removeedge(self,u,v):
-        del self[u][v]
-        del self[v][u]
+        del self[u,v]
+        del self[v,u]
 
     def getNbrs(self, k):
         return self.values[k].keys()
