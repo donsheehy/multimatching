@@ -49,6 +49,15 @@ class Graph:
     def get_values(self):
         return self.values
 
+    def get_min_cap(self):
+        min = float('Inf')
+        for u in self.get_values().keys():
+            vals = self.values[u]
+            for v in vals.keys():
+                if self[u,v] < min and self[u,v] > 0:
+                    min = self[u,v]
+        return min
+
     def get_max_cap(self):
         max = 0
         for u in self.get_values().keys():

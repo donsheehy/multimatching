@@ -4,61 +4,65 @@ import copy
 import math
 
 def generate_level_graph(graph, s, t):
-    Q = [(None, s)]
-    levels = Graph()
+    Q = [s]
+    levelgraph = Graph()
+    tFound = False
     while Q:
-        (prev,v) = Q.pop(0)
-        if v not in levels:
-            levels[prev,v] = graph[prev,v]
-            if v != t:
-                for nbr in graph.getNbrs(v):
-                    if graph[v, nbr] > 0:
-                        Q.append((v,nbr))
-    return levels
+        v = Q.pop(0)
+        if v == t:
+            tFound = True
+            continue
+        for nbr in graph.getNbrs(v):
+            if ((nbr not in levelgraph and not tFound) or nbr == t) and graph[v,nbr] > 0:
+                levelgraph.addedge((v, nbr), graph[v, nbr])
+                Q.append(nbr)
+    return levelgraph
 
 def depth_first_search_with_levels(levelgraph, s, t):
-    S = [(None, s)] 
+    S = [(None, s)]
+    visited = []
     path = []
     while S:
-        current = S.pop()
-        v = current[1]
-        if v not in path:
-            path.append(v)
+        (prev, v) = S.pop()
+        if v not in visited or v == t:
+            visited.append(v)
+            path.append((prev, v))
             if v == t:
                 continue
             for nbr in levelgraph.getNbrs(v):
-                if nbr not in path:
+                if levelgraph[v,nbr] > 0:
                     S.append((v,nbr))
-    path.append(t)
     return path
 
 def generate_blocking_flow(levelgraph, path, t):
     blockingFlow = Flow()
-    currentPath = []
+    currentPath = Flow()
     prev = path.pop(0)
     while path:
-        curr = path.pop(0)
-        currentPath.append((prev, curr))
-        if curr != t:
-            prev = curr
+        (u,v) = path.pop(0)
+        currentPath.addedge((u,v), levelgraph[u,v])
+        if v == t:
+            currentPath.set_all_cap(currentPath.get_min_cap())
+            blockingFlow += currentPath
+            currentPath = Flow()
+            if len(path) != 0:
+                prev = path.pop(0)
+                (u,v) = prev
+                currentPath.addedge((u,v), levelgraph[u,v])
+        # elif prev != (u,v):
+        #     #figure out how to backtrack when reaching a dead end in the path
+        #     pass
         else:
-            blockingFlow += augment_s_t_flow(levelgraph, currentPath)
-            currentPath.clear()
+            prev = (u,v)
     return blockingFlow
 
 def augment_s_t_flow(graph, path):
-    flow = Flow()
-    minCap = float('Inf')
-    for e in path:
-        currCap = graph[e]
-        flow.addedge(e, 0)
-        if currCap < minCap:
-            minCap = currCap
-    flow.set_all_cap(minCap)
-    return flow
+    augmentFlow = path.set_all_cap(graph.get_min_cap())
+    return augmentFlow
 
 def generate_full_blocking_flow(graph, s, t):
-    return generate_blocking_flow(graph, depth_first_search_with_levels(generate_level_graph(graph, s, t), s, t), t)
+    levelGraph = generate_level_graph(graph, s, t)
+    return generate_blocking_flow(levelGraph, depth_first_search_with_levels(levelGraph, s, t), t)
 
 def dinics(graph, s, t):
     residual = copy.deepcopy(graph)
@@ -67,9 +71,18 @@ def dinics(graph, s, t):
     while True:
         try:
             blockingFlow = generate_full_blocking_flow(residual, s, t)
-            flow += blockingFlow
-            residual -= blockingFlow
+            if len(blockingFlow.get_values()) != 0:
+                flow -= blockingFlow
+                residual += blockingFlow
+            else:
+                break
         except:
             break
     
     print(flow)
+
+    maxFlow = 0
+    for nbr in flow.getNbrs(t):
+        maxFlow -= flow[t,nbr]
+
+    return maxFlow
