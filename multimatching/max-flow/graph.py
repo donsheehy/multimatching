@@ -59,20 +59,16 @@ class Graph:
 
     def get_min_cap(self):
         min = float('Inf')
-        for u in self.get_values().keys():
-            vals = self.values[u]
-            for v in vals.keys():
-                if self[u,v] < min and self[u,v] > 0:
-                    min = self[u,v]
+        for u,v in self._edges:
+            if self[u,v] < min and self[u,v] > 0:
+                min = self[u,v]
         return min
 
     def get_max_cap(self):
         max = 0
-        for u in self.get_values().keys():
-            vals = self.values[u]
-            for v in vals.keys():
-                if self[u,v] > max:
-                    max = self[u,v]
+        for u,v in self._edges:
+            if self[u,v] > max:
+                max = self[u,v]
         return max
 
     def __iadd__(self, other):
