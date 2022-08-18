@@ -20,6 +20,7 @@ class Flow(Graph):
         self.addvertex(u)
         self.addvertex(v)
         self[u,v] = c
+        self._edges.append(E)
 
     def __iadd__(self, other):
         for u in other.get_values().keys():
@@ -34,3 +35,7 @@ class Flow(Graph):
             for v in vals.keys():
                 super().__setitem__((u,v), self[u,v] - other[u,v])
         return self
+
+    def reset_cap(self, graph):
+        for u,v in self._edges:
+            self[u,v] = graph[u,v]

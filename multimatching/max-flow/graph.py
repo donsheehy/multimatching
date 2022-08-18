@@ -1,5 +1,6 @@
 class Graph:
     def __init__(self, V = None, E = None):
+        self._edges = []
         self.values = {}
         if E is not None:
             for u,v,c in E:
@@ -37,15 +38,18 @@ class Graph:
         self.addvertex(v)
         self[u,v] = c
         self[v,u] = 0
+        self._edges.append(E)
 
     def removevertex(self,v):
         for nbr in self[v]:
             del self[nbr,v]
         del self[v]
 
-    def removeedge(self,u,v):
+    def removeedge(self,E):
+        (u,v) = E
         del self[u,v]
         del self[v,u]
+        self._edges.remove(E)
 
     def getNbrs(self, k):
         return self.values[k].keys()
@@ -92,7 +96,5 @@ class Graph:
         return str(self.values)
 
     def set_all_cap(self, c):
-        for u in self.get_values().keys():
-            vals = self.values[u]
-            for v in vals.keys():
-                self[u,v] = c
+        for u,v in self._edges:
+            self[u,v] = c
